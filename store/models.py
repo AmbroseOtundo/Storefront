@@ -1,8 +1,15 @@
-from itertools import product
 from django.db import models
+
+# many  to many relationship
+class Promotion(models.Model):
+    description =  models.CharField(max_length=255)
+    discount = models.FloatField()
+    
 
 class Collection(models.Model):
     title = models.CharField(max_length=255)
+    # show the circular dependency  sol
+    featured_product = models.ForeignKey('Product', on_delete=models.SET_NULL, null= True, related_name='+')
 
 class Product(models.Model):
     title = models.CharField(max_length=100)
@@ -11,6 +18,8 @@ class Product(models.Model):
     inventory = models.IntegerField()
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
+    promotions = models.ManyToManyField(Promotion)
+
 
 class Customer(models.Model):
     # store the default value

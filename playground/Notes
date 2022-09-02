@@ -52,3 +52,7 @@ Tags --- " Tag, TaggedItem"
 # Creating a one-to-many relationship between the Adress and Customer models.
 customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     
+<!-- Circular dependency -->
+where two classes depend on each other
+
+<!-- Generic relationships -->
