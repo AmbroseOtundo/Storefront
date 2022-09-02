@@ -32,3 +32,16 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     # ...
 ]
+
+
+<!-- DATA MODELING -->
+Here we are trying to model data for an ecomerce website
+
+<!-- Product -->
+: - title
+: - description
+: - inventory
+<!-- Break down our project -->
+<!-- settled into two apps -->
+Store --- " Product, collection, customer, cart, cartitem, order, orderitem"
+Tags --- " Tag, TaggedItem"
