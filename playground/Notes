@@ -45,3 +45,10 @@ Here we are trying to model data for an ecomerce website
 <!-- settled into two apps -->
 Store --- " Product, collection, customer, cart, cartitem, order, orderitem"
 Tags --- " Tag, TaggedItem"
+
+# Creating a one-to-one relationship between the Adress and Customer models.
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, primary_key=True)
+    
+# Creating a one-to-many relationship between the Adress and Customer models.
+customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    
