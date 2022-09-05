@@ -13,5 +13,5 @@ class TaggedItem(models.Model):
     # type of product to generate generic models relationship with use of content type
     product = models.ForeignKey(ContentType,  on_delete=models.CASCADE)
     object_id = models.PositiveBigIntegerField()
-    content_object = GenericForeignKey()
+    content_object = GenericForeignKey('product', 'object_id')
  

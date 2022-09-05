@@ -56,3 +56,10 @@ customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
 where two classes depend on each other
 
 <!-- Generic relationships -->
+
+reverting migrations
+===== just delete the code or use git log to revert the commits
+
+using mysql
+pip install mysqlclient
+connecting ---- mysql -u root -p

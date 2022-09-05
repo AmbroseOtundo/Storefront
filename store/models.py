@@ -13,8 +13,12 @@ class Collection(models.Model):
 
 class Product(models.Model):
     title = models.CharField(max_length=100)
+   # A slug is a short label for something, containing only letters, numbers, underscores or hyphens.
+   # They're generally used in URLs. In this example, we're using them so that we can have nice URLs
+   # for products.
+    slug = models.SlugField()
     description = models.TextField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
     inventory = models.IntegerField()
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
