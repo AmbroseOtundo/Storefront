@@ -63,3 +63,8 @@ reverting migrations
 using mysql
 pip install mysqlclient
 connecting ---- mysql -u root -p
+
+managers and querysets
+get return a real object
+
+queryset api lookups == check it up
