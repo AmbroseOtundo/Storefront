@@ -10,6 +10,12 @@ class Collection(models.Model):
     title = models.CharField(max_length=255)
     # show the circular dependency  sol
     featured_product = models.ForeignKey('Product', on_delete=models.SET_NULL, null= True, related_name='+')
+    
+    def __str__(self) -> str:
+        return self.title
+    class Meta:
+        ordering = ['title']
+    
 
 class Product(models.Model):
     title = models.CharField(max_length=100)
@@ -24,6 +30,10 @@ class Product(models.Model):
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
     promotions = models.ManyToManyField(Promotion)
 
+    def __str__(self) -> str:
+        return self.title
+    class Meta:
+        ordering = ['title']
 
 class Customer(models.Model):
     # store the default value
@@ -43,7 +53,13 @@ class Customer(models.Model):
     phone = models.CharField(max_length=255)
     birth_date = models.DateField(null=True)
     membership = models.CharField(max_length=50, choices=MEMBERSHIP_CHOICES, default='MEMBERSHIP_BRONZE')
-    
+    def __str__(self):
+        # combine first name and last name with th f string
+        return f'{self.first_name} {self.last_name}'
+    class Meta:
+        ordering = ['first_name', 'last_name']
+
+
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = 'P'
     PAYMENT_STATUS_COMPLETE = 'C'
@@ -62,6 +78,9 @@ class Order(models.Model):
     payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     # protect our data to prevent deletion
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+
+    
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
