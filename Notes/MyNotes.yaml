@@ -1,0 +1,248 @@
+<!-- django debugging -->
+launch the debugger and create the launch.json file. 
+under RUNSERVER input a new argument to specfy the port to be "9000" or any other number port.
+WE can set break points when debugging
+
+<!-- Using Django Debug ToolBar -->
+After installation
+add it to the django settings as : 
+
+1. INSTALLED_APPS = [
+    # ...
+    "debug_toolbar",
+    # ...
+]
+
+2. Add the URLs
+Add django-debug-toolbar’s URLs to your project’s URLconf:
+
+from django.urls import include, path
+
+urlpatterns = [
+    # ...
+    path('__debug__/', include('debug_toolbar.urls')),
+]
+This example uses the __debug__ prefix, but you can use any prefix that doesn’t clash with your application’s URLs.
+
+3. Add the Middleware
+The Debug Toolbar is mostly implemented in a middleware. Add it to your MIDDLEWARE setting:
+
+MIDDLEWARE = [
+    # ...
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # ...
+]
+
+
+<!-- DATA MODELING -->
+Here we are trying to model data for an ecomerce website
+
+<!-- Product -->
+: - title
+: - description
+: - inventory
+<!-- Break down our project -->
+<!-- settled into two apps -->
+Store --- " Product, collection, customer, cart, cartitem, order, orderitem"
+Tags --- " Tag, TaggedItem"
+
+# Creating a one-to-one relationship between the Adress and Customer models.
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, primary_key=True)
+    
+# Creating a one-to-many relationship between the Adress and Customer models.
+customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    
+<!-- Circular dependency -->
+where two classes depend on each other
+
+<!-- Generic relationships -->
+
+reverting migrations
+===== just delete the code or use git log to revert the commits
+
+using mysql
+pip install mysqlclient
+connecting ---- mysql -u root -p
+
+managers and querysets
+get return a real object
+
+queryset api field lookups == check it up
+<!-- https://docs.djangoproject.com/en/4.1/ref/models/querysets/#field-lookups -->
+lt -- less than
+gt ---  greater than
+<!-- complex lookups using Querysets objects with Q -->
+
+example lets  get a # --- Product : inventory < 10 AND  price < 20
+first approach--- queryset =  Product.objects.filter(inventory__lt=10, unit_price__lt=20)
+second approach --- queryset =  Product.objects.filter(inventory__lt=10).filter(unit_price__lt=20)
+
+lets use the Q  (infull -- Query) operator --  we import it first
+from django.db.models import Q
+query_set =  Product.objects.filter(Q(inventory__lt=10) | Q(unit_price__lt=20))  /// the | symbol repRE -- OR
+--- SQL code generated from the above code ---
+SELECT `store_product`.`id`,
+       `store_product`.`title`,
+       `store_product`.`slug`,
+       `store_product`.`description`,
+       `store_product`.`unit_price`,
+       `store_product`.`inventory`,
+       `store_product`.`last_update`,
+       `store_product`.`collection_id`
+  FROM `store_product`
+ WHERE (`store_product`.`inventory` < 10 OR `store_product`.`unit_price` < 20)
+
+ <!-- Referencing fields using F  (infull Field)objects -->
+ sometimes we need to ref 
+ query_set =  Product.objects.filter(inventory=F('unit_price')) --  unit_price is the name of the field and the inventory is a field
+
+ <!-- Sorting Data -->
+  query_set =  Product.objects.order_by('title')
+  OR order by multiple fields
+
+  query_set =  Product.objects.order_by('title')
+
+  use of : earliest()
+        :latest()
+
+<!-- Limiting -->
+query_set =  Product.objects.all(:5) ---  includes the first 5 products
+query_set =  Product.objects.all(5:10) ---  includes the from 5 to 10 products
+
+<!-- use of the Values method -->
+query_set =  OrderItem.objects.values('product__id').distinct() -- the distinct removes duplicates
+
+<!-- deferrring fielda -->
+.only() -- specifies the only field we want from the db --- we should be  careful with this method . it runs alot of queries under the hood.
+<!-- defer -->
+
+we defer the loading of the items to later
+
+
+<!-- selecting related objects -->
+
+we use .select_related('collection').all()
+prefetch_related --  when we want to load multiple objects
+
+<!-- Aggregating objects -->
+from django.db.models.aggregates import Count, Max,Min,Avg,Sum
+.aggregate() -- use to math functions
+ result= Product.objects.aggregate(Count('id'), min_price=Min('unit_price'))
+
+<!-- Annotating objects -->
+query_set=Customer.objects.annotate(is_new=True)
+
+<!-- calling db functions -->
+from django.db.models import Func
+CONCAT engine -- this does this:-it joins the two names using concatenation
+
+ <!-- queryset= Customer.objects.annotate(
+        # CONCAT
+        full_name=Func(F('first_name'), Value(' '),  F('last_name'), function='CONCAT')
+    )
+    return render(request, 'hello.html', {'name': 'Ambrose', 'result':queryset}) -->
+
+--        CONCAT(`store_customer`.`first_name`, ' ', `store_customer`.`last_name`) AS `full_name`
+
+<!-- SIMPLE SHORTHAND FOR THE CONCAT CLASS -->
+from django.db.models.functions import Concat
+
+ queryset= Customer.objects.annotate(
+        full_name=Concat('first_name', Value(' '), 'last_name')
+    )
+    
+<!-- Grouping data -->
+we use count
+
+example:
+ queryset= Customer.objects.annotate(
+    orders_count=Count('orders')
+ )
+
+<!-- Working with Expression Wrappers -->
+the expressions classes are : Value, F, Func, Aggregate, Expression Wrapper
+ discounted_price = ExpressionWrapper(
+    F('unit_price') * 0.9, output_field=Decimal())
+
+    queryset= Customer.objects.annotate(
+        discounted_price=discounted_price
+   )
+
+
+   <!-- Querying genric relationships -->
+from django.contrib.contenttypes.models import ContentType
+from store.models import Product
+from tags.models import TaggedItem
+
+content_type = ContentType.objects.get_for_model(product)
+TaggedItem.objects.select_related('tag').filter(
+    content_type=content_type,
+    object_id=1
+)
+
+# custom Managers  lesson 57
+# query set cache
+# creating objects-- inserting data int the db
+collection = Collection()
+collection.name= 'video games'
+collection.featured_product = Prouct(pk=1)
+collection.save()
+
+# new method
+collection = Collection.objects.create(name='video game', featured_product_id=1)
+
+# updating objects--  data into the db
+
+collection = Collection.objects.get(pk=12)
+collection.title= 'Games'
+collection.featured_product = None
+collection.save()
+# new method
+collection = Collection.objects.filter(pk=12).update( featured_product_id=None)
+# deleting objects
+collection = Collection(pk=12)
+collection.delete()
+
+# or
+Collection.objects.filter(id__gt=10).delete()
+
+# Transactions
+def say_hello(request):
+# sometimes we want to  maka a change tp our code and in that case we use transactions to encapsulate a 
+# change so that incase of failure all the change are rejected as a bundle. we import it using 
+# from django.db import transaction
+#  we can use it as a decorator -- @transaction.atomic()
+    with transaction.atomic():
+        order = Order()
+        order.customer_id = 1
+        order.save()
+
+        item = OrderItem()
+        item.order = order
+        item.product_id=1
+        item.quantity = 1
+        item.unit_price=10
+        item.save()
+
+# executing raw SQL queries.
+# examples
+# use this approach when it is absolutely necessary
+    queryset=Product.objects.raw('SELECT * FROM  store_product')
+    return render(request, 'hello.html', {'name': 'Ambrose', 'result':list(queryset)})
+
+# use of another approach of accessing the db directly. we can use the connection module
+from django.db import connection
+cursor = connection.cursor()
+    cursor.execute('any SQL query here')
+    # Closing the connection to the database to release resources after completion
+    cursor.close()
+
+# we can use also the with
+    with connection.cursor() as cursor:
+        cursor.execute()
+
+
+# we can use also the with to get stored procedures
+    # Calling a stored procedure.
+    with connection.cursor() as cursor:
+        cursor.callproc('get_customers', ['params'])
