@@ -23,7 +23,7 @@ class Product(models.Model):
    # They're generally used in URLs. In this example, we're using them so that we can have nice URLs
    # for products.
     slug = models.SlugField()
-    description = models.TextField()
+    description = models.TextField(null=True)
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
     inventory = models.IntegerField()
     last_update = models.DateTimeField(auto_now=True)
