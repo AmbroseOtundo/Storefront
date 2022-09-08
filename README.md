@@ -1,3 +1,3 @@
 StoreFront made in django
 <br>
-In Development
+README file in progress
